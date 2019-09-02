@@ -2,8 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component {
-    render() {
+function Square(props){
         return (
             <button
                 className="square"
@@ -12,12 +11,11 @@ class Square extends React.Component {
                 // but i don't think that is necessary, 
                 // because onClick on expect a function, and this.props.onClick is already a function
                 // why bother to encapsulate it again? And this works
-                onClick={this.props.onClick}
+                onClick={props.onClick}
             >
-                {this.props.value}
+                {props.value}
             </button>
         );
-    }
 }
 
 class Board extends React.Component {
