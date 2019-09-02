@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import { stat } from 'fs';
 
 function Square(props){
         return (
@@ -88,6 +87,16 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            history: [{
+                squares: Array(9).fill(null),
+              }],
+              xIsNext: true,
+        }
+    }
+
     render() {
         return (
             <div className="game">
