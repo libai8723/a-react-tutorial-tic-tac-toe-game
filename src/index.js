@@ -32,6 +32,10 @@ class Board extends React.Component {
         return(
             <Square 
                 value={this.state.squares[i]}
+                // the below line is important, we have to use this. as prefix
+                // because I do a lot try, without this. we cann't access handleClick function
+                // and use fat arrow function is also important, because we want 
+                // handleClick's 'this' binding to lexical this AKA: current Board instance.
                 onClick={() => this.handleClick(i)}
             />
         );
