@@ -97,7 +97,7 @@ class Game extends React.Component {
             moves: moves.concat(
                 [{
                     who: this.state.xIsNext?'X':'O',
-                    row: Math.ceil(i / 3),
+                    row: Math.floor(i / 3) + 1,
                     col: i % 3 + 1,
                 }]
             ),
