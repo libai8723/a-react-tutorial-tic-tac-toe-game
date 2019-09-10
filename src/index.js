@@ -22,6 +22,7 @@ class Board extends React.Component {
     renderSquare(i) {
         return (
             <Square
+                key={i}
                 value={this.props.squares[i]}
                 // the below line is important, we have to use this. as prefix
                 // because I do a lot try, without this. we cann't access handleClick function
@@ -41,7 +42,7 @@ class Board extends React.Component {
             for (let col = 0; col < 3; col++) {
                 row_cell.push(this.renderSquare(row * 3 + col))
             }
-            board.push(<div className="board-row">{row_cell}</div>)
+            board.push(<div key={row} className="board-row">{row_cell}</div>)
         }
         return <div>{board}</div>
     }
@@ -63,10 +64,12 @@ class Game extends React.Component {
             xIsNext: true,
             stepNumber: 0,
             moves: [{
+                sequenceNo: 0,
                 who: null,
                 row: null,
                 col: null
-            }]
+            }],
+            asc: true
         }
     }
 
@@ -96,6 +99,7 @@ class Game extends React.Component {
             stepNumber: history.length,
             moves: moves.concat(
                 [{
+                    sequenceNo: history.length,
                     who: this.state.xIsNext?'X':'O',
                     row: Math.floor(i / 3) + 1,
                     col: i % 3 + 1,
@@ -104,26 +108,48 @@ class Game extends React.Component {
         });
     }
 
-    render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
+    handleSequence(evt) {
+        console.log(arguments);
+        console.log(evt.target.checked);
+        this.setState({
+            asc: evt.target.checked
+        });
+    }
 
-        const moves = this.state.moves.map((move, idx) => {
-            const desc = (idx ?
-                'Go #' + idx + " " + move.who + " at (" + move.row + "," + move.col + ")" :
+    /**
+     * construct a array of react elements in asc or desc order
+     * @param {boolean parameter whether we choose asc} asc 
+     */
+    construtMovesInSequence(asc) {
+        // make a copy of moves in state
+        const moves = this.state.moves.slice();
+
+        if(asc){
+            moves.reverse();
+        }
+        return moves.map((move) => {
+            const desc = (move.sequenceNo ?
+                'Go #' + move.sequenceNo + " " + move.who + " at (" + move.row + "," + move.col + ")" :
                 'Go to game start');
             return (
-                <li key={idx}>
+                <li key={move.sequenceNo}>
                     <button 
-                        onClick={() => this.jumpTo(idx)}
-                        className={idx === this.state.stepNumber?'selected-move':''}
+                        onClick={() => this.jumpTo(move.sequenceNo)}
+                        className={move.sequenceNo === this.state.stepNumber?'selected-move':''}
                     >
                         {desc}
                     </button>
                 </li>
             );
         });
+    }
+
+    render() {
+        const history = this.state.history;
+        const current = history[this.state.stepNumber];
+        const winner = calculateWinner(current.squares);
+
+        const moves = this.construtMovesInSequence(this.state.asc);
 
         let status;
         if (winner) {
@@ -140,6 +166,16 @@ class Game extends React.Component {
                     />
                 </div>
                 <div className="game-info">
+                    <div>
+                        <input 
+                            type="checkbox" 
+                            name="move-sequence" 
+                            id="move-sequence-id"
+                            checked={this.state.asc}
+                            onChange={(evt) => this.handleSequence(evt)}
+                        />
+                        <label htmlFor="move-sequence-id">ASC</label>
+                    </div>
                     <div>{status}</div>
                     <ol>{moves}</ol>
                 </div>
