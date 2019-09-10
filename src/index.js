@@ -5,7 +5,7 @@ import './index.css';
 function Square(props) {
     return (
         <button
-            className="square"
+            className={props.highLighted?"square highLighted":"square"}
             // here is something slightly different with tutorials
             // in the tutorials they use another arrow function to encapsulate this.props.onClick()
             // but i don't think that is necessary, 
@@ -31,6 +31,7 @@ class Board extends React.Component {
                 // the arrow function below, accept no parameter, this is important
                 // once I add a 'i' as the parameter, this leads to error, i becomes the event
                 onClick={() => this.props.onClick(i)}
+                highLighted = {this.highLighted(i)}
             />
         );
     }
@@ -47,6 +48,16 @@ class Board extends React.Component {
         return <div>{board}</div>
     }
 
+    // calculate whether a square should be high lighted
+    highLighted(i) {
+        for (let index = 0; index < this.props.WinnerSquares.length; index++) {
+            if (this.props.WinnerSquares[index] === i) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     render() {
         return (
             this.makeSquares()
@@ -58,18 +69,25 @@ class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            // every history state in the board
             history: [{
                 squares: Array(9).fill(null),
             }],
+            // is X for next move?
             xIsNext: true,
+            // current step number, mainly used in time travel
             stepNumber: 0,
+            // every move in history, used to show coordinate location for each move
             moves: [{
                 sequenceNo: 0,
                 who: null,
                 row: null,
                 col: null
             }],
-            asc: true
+            // whether show moves in ASC sequence
+            asc: true,
+            // the winner's three squares
+            WinnerSquares: []
         }
     }
 
@@ -86,11 +104,21 @@ class Game extends React.Component {
         const current = history[history.length - 1];
         // get an copy of squares in state
         const squares = current.squares.slice();
-        if (calculateWinner(squares) || squares[i]) {
+        // if a square has been Occupied then do nothing
+        // if already has a winner then do nothing
+        if (squares[i] || calculateWinner(squares)) {
             return;
         }
 
+        // fill a square with X or O
         squares[i] = this.state.xIsNext ? 'X' : 'O';
+
+        // calc the 3 winner squares
+        let WinnerSquares = [];
+        if(calculateWinner(squares)) {
+            WinnerSquares = CalcWinnerSquares(squares);
+        }
+        
         this.setState({
             history: history.concat(
                 [{ squares: squares }]
@@ -105,6 +133,7 @@ class Game extends React.Component {
                     col: i % 3 + 1,
                 }]
             ),
+            WinnerSquares: WinnerSquares,
         });
     }
 
@@ -162,6 +191,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
+                        WinnerSquares={this.state.WinnerSquares}
                         onClick={(i) => this.handleClick(i)}
                     />
                 </div>
@@ -210,4 +240,25 @@ function calculateWinner(squares) {
         }
     }
     return null;
+}
+
+// return the winner's 3 squares
+function CalcWinnerSquares(squares) {
+    const lines = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+        const [a, b, c] = lines[i];
+        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+            return lines[i];
+        }
+    }
+    return [null, null, null];
 }
