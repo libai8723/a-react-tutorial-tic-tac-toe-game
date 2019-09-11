@@ -87,7 +87,9 @@ class Game extends React.Component {
             // whether show moves in ASC sequence
             asc: true,
             // the winner's three squares
-            WinnerSquares: []
+            WinnerSquares: [{
+                sequences: [null, null, null]
+            }]
         }
     }
 
@@ -101,6 +103,8 @@ class Game extends React.Component {
     handleClick(i) {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const moves = this.state.moves.slice(0, this.state.stepNumber + 1);
+        const WinnerSquares = this.state.WinnerSquares.slice(0, this.state.stepNumber + 1);
+
         const current = history[history.length - 1];
         // get an copy of squares in state
         const squares = current.squares.slice();
@@ -114,9 +118,9 @@ class Game extends React.Component {
         squares[i] = this.state.xIsNext ? 'X' : 'O';
 
         // calc the 3 winner squares
-        let WinnerSquares = [];
+        let Squares = [null, null, null];
         if(calculateWinner(squares)) {
-            WinnerSquares = CalcWinnerSquares(squares);
+            Squares = CalcWinnerSquares(squares);
         }
         
         this.setState({
@@ -133,10 +137,15 @@ class Game extends React.Component {
                     col: i % 3 + 1,
                 }]
             ),
-            WinnerSquares: WinnerSquares,
+            WinnerSquares: WinnerSquares.concat(
+                [{sequences: Squares}]
+            ),
         });
     }
 
+    /**
+     * handle the click event of ASC checkbox
+     */
     handleSequence(evt) {
         console.log(arguments);
         console.log(evt.target.checked);
@@ -176,6 +185,7 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
+        const WinnerSquares = this.state.WinnerSquares[this.state.stepNumber].sequences;
         const winner = calculateWinner(current.squares);
 
         const moves = this.construtMovesInSequence(this.state.asc);
@@ -191,7 +201,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
-                        WinnerSquares={this.state.WinnerSquares}
+                        WinnerSquares={WinnerSquares}
                         onClick={(i) => this.handleClick(i)}
                     />
                 </div>
