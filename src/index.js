@@ -193,9 +193,12 @@ class Game extends React.Component {
         const moves = this.construtMovesInSequence(this.state.asc);
 
         let status;
-        if (winner) {
+        if (winner === 'X' || winner === 'O') {
             status = 'Winner: ' + winner;
-        } else {
+        } else if(winner === 'draw') {
+            status = 'Draw game, play again.';
+        } 
+        else {
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
         return (
@@ -250,6 +253,17 @@ function calculateWinner(squares) {
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
             return squares[a];
         }
+    }
+
+    let OccupiedSquaresNumber = 0;
+    for (let index = 0; index < squares.length; index++) {
+        const element = squares[index];
+        if(element === 'X' || element === 'O') {
+            OccupiedSquaresNumber += 1;
+        }
+    }
+    if(OccupiedSquaresNumber >= 9) {
+        return 'draw';
     }
     return null;
 }
